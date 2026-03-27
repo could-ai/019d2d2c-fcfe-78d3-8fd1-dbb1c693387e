@@ -7,117 +7,205 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Presentation',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2196F3),
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
+        '/': (context) => const PresentationScreen(),
       },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class SlideData {
   final String title;
+  final String content;
+  final IconData icon;
+  final Color backgroundColor;
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  SlideData({
+    required this.title,
+    required this.content,
+    required this.icon,
+    required this.backgroundColor,
+  });
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class PresentationScreen extends StatefulWidget {
+  const PresentationScreen({super.key});
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  State<PresentationScreen> createState() => _PresentationScreenState();
+}
+
+class _PresentationScreenState extends State<PresentationScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<SlideData> _slides = [
+    SlideData(
+      title: '歡迎使用 CouldAI',
+      content: '我是一個強大的 Flutter 開發助手。\n\n雖然我不能直接匯出 PPTX 檔案，\n但我可以幫您用程式碼打造專屬的簡報應用程式！',
+      icon: Icons.auto_awesome,
+      backgroundColor: const Color(0xFFE3F2FD),
+    ),
+    SlideData(
+      title: '我可以為您做什麼？',
+      content: '1. 撰寫簡報大綱與內容\n2. 開發跨平台 App (iOS, Android, Web)\n3. 設計精美的 UI/UX 介面\n4. 串接 Supabase 資料庫',
+      icon: Icons.build_circle_outlined,
+      backgroundColor: const Color(0xFFF3E5F5),
+    ),
+    SlideData(
+      title: '互動式體驗',
+      content: '透過 Flutter 製作的簡報，\n您可以加入動畫、即時資料、甚至是互動按鈕，\n這是一般靜態簡報軟體做不到的！',
+      icon: Icons.touch_app,
+      backgroundColor: const Color(0xFFE8F5E9),
+    ),
+    SlideData(
+      title: '告訴我您的需求',
+      content: '您想要做什麼主題的簡報呢？\n請告訴我，我會立刻為您生成內容與畫面！',
+      icon: Icons.chat_bubble_outline,
+      backgroundColor: const Color(0xFFFFF3E0),
+    ),
+  ];
+
+  void _nextPage() {
+    if (_currentPage < _slides.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _previousPage() {
+    if (_currentPage > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (int page) {
+              setState(() {
+                _currentPage = page;
+              });
+            },
+            itemCount: _slides.length,
+            itemBuilder: (context, index) {
+              return _buildSlide(_slides[index]);
+            },
+          ),
+          
+          // Navigation Controls
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Previous Button
+                  IconButton.filledTonal(
+                    onPressed: _currentPage == 0 ? null : _previousPage,
+                    icon: const Icon(Icons.arrow_back),
+                    iconSize: 32,
+                  ),
+                  
+                  // Page Indicators
+                  Row(
+                    children: List.generate(
+                      _slides.length,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        height: 12,
+                        width: _currentPage == index ? 32 : 12,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index 
+                              ? Theme.of(context).colorScheme.primary 
+                              : Colors.grey.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Next Button
+                  IconButton.filled(
+                    onPressed: _currentPage == _slides.length - 1 ? null : _nextPage,
+                    icon: const Icon(Icons.arrow_forward),
+                    iconSize: 32,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
-          ],
-        ),
+    );
+  }
+
+  Widget _buildSlide(SlideData slide) {
+    return Container(
+      color: slide.backgroundColor,
+      padding: const EdgeInsets.all(40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            slide.icon,
+            size: 120,
+            color: Colors.black87,
+          ),
+          const SizedBox(height: 40),
+          Text(
+            slide.title,
+            style: const TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          Text(
+            slide.content,
+            style: const TextStyle(
+              fontSize: 24,
+              height: 1.5,
+              color: Colors.black54,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
